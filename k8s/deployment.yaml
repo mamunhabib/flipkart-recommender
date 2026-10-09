@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flipkart-app
+  namespace: flipkart-recommender
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flipkart-app
+  template:
+    metadata:
+      labels:
+        app: flipkart-app
+    spec:
+      # Step 3: Tell Kubernetes to use the PAT we just sealed to pull the image!
+      imagePullSecrets:
+        - name: ghcr-secret
+      containers:
+        - name: flipkart-app
+          image: ghcr.io/mamunhabib/flipkart-recommender:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5000
+          # Load the API keys from your sealed-secret.yaml!
+          envFrom:
+            - secretRef:
+                name: flipkart-secrets
+          # Tell the app where the Redis "Front Desk" is!
+          env:
+            - name: REDIS_URL
+              value: "redis://redis:6379"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: flipkart-service
+  namespace: flipkart-recommender
+spec:
+  # LoadBalancer exposes this outside the cluster to your Mac
+  type: LoadBalancer
+  ports:
+    - port: 8082
+      targetPort: 5000
+  selector:
+    app: flipkart-app
