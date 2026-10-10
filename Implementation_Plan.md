@@ -88,11 +88,12 @@ Now that our API keys are loaded and our data script is written, we must give th
 
 ## Phase 6: Containerization & Local Jenkins CI Pipeline
 **Steps:**
-1. Write an optimized `Dockerfile` and `.dockerignore`.
-2. Write and apply `k8s/jenkins.yaml` to deploy a global Jenkins server into OrbStack.
-3. **[PAT Requirement]:** Inject a GitHub Personal Access Token (PAT) into the Jenkins UI `Credentials` manager so Jenkins has permission to interact with GitHub and GHCR.
-4. Write a declarative `Jenkinsfile` (Groovy) that includes an **SCM Polling trigger** (`pollSCM`) to automatically detect `git push` events.
-5. Configure the `Jenkinsfile` to build the Docker image and push it to the GitHub Container Registry (GHCR) using the injected PAT.
+1. Write an optimized `Dockerfile` and `.dockerignore`, including the `org.opencontainers.image.source` Label for automatic GHCR repository linking.
+2. Write a custom `Dockerfile.jenkins` to install `kubectl` and the Docker CLI. Configure it with `USER root` and Git `safe.directory` to bypass Docker socket and Git ownership permission errors.
+3. Write and apply `k8s/jenkins.yaml` to deploy the custom Jenkins server into OrbStack.
+4. **[PAT Requirement]:** Inject a GitHub Personal Access Token (PAT) into the Jenkins UI `Credentials` manager so Jenkins has permission to interact with GitHub and GHCR.
+5. Write a declarative `Jenkinsfile` (Groovy) that includes an **SCM Polling trigger** (`pollSCM`) to automatically detect `git push` events.
+6. Configure the `Jenkinsfile` to build the Docker image and push it to the GitHub Container Registry (GHCR) using the injected PAT.
 
 ---
 
@@ -121,4 +122,7 @@ Click the blue Save button.
 
 ## Phase 8: Enterprise Observability
 **Steps:**
-1. Ensure the Flask `/metrics` endpoint is being scraped by the Helm Alloy Agent and pushed to Grafana Cloud.
+1. Update `app/__init__.py` with `prometheus_client` and `DispatcherMiddleware` to automatically expose a `/metrics` endpoint.
+2. Update `k8s/deployment.yaml` with `prometheus.io/scrape` annotations to broadcast the metrics.
+3. Ensure the Flask `/metrics` endpoint is successfully scraped by the Helm Alloy Agent and pushed to Grafana Cloud.
+
