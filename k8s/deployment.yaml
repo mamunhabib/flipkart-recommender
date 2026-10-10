@@ -12,6 +12,10 @@ spec:
     metadata:
       labels:
         app: flipkart-app
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "5000"
+        prometheus.io/path: "/metrics"
     spec:
       # Step 3: Tell Kubernetes to use the PAT we just sealed to pull the image!
       imagePullSecrets:
