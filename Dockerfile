@@ -1,6 +1,9 @@
 # 1. Base Image: Start with a very small, lightweight version of Linux that has Python 3.11 pre-installed.
 FROM python:3.11-slim
 
+# Automatically link this Docker image to the GitHub repository so it appears on the sidebar
+LABEL org.opencontainers.image.source="https://github.com/mamunhabib/flipkart-recommender"
+
 # 2. Working Directory: Create a folder called /app inside the container and move into it.
 WORKDIR /app
 
